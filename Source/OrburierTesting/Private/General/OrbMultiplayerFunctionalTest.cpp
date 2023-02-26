@@ -102,14 +102,17 @@ void AOrbMultiplayerFunctionalTest::ReceiveRunTest(const TArray<FString>& Params
 // Called every frame
 void AOrbMultiplayerFunctionalTest::Tick(float DeltaTime)
 {
-	if(!bIsRunning)
-		return;
-
 	if(!bIsFinishingNetwork)
 	{
+		if(IsSkipping)
+		{
+			FinishTest(EFunctionalTestResult::Succeeded, "Not run for this role");
+			return;
+		}
+		
 		Super::Tick(DeltaTime);
 	}
-	else
+	else if(bIsRunning || IsSkipping)
 	{
 		if(InitialEndTime == 0.f)
 			InitialEndTime = TotalTime;
@@ -123,11 +126,6 @@ void AOrbMultiplayerFunctionalTest::Tick(float DeltaTime)
 		}
 		else if(TotalTime > InitialEndTime + (NetworkingFinishTimeLimit + (RunTestSource ? 0 : NetworkingFinishTimeLimit)))
 		{
-			for (AOrbMultiplayerAutomationController* PendingTestResult : PendingTestResults)
-			{
-				PendingTestResult->CancelTest(this);
-			}
-
 			CancelPendingTests();
 			FinishTest(EFunctionalTestResult::Error, FString::FromInt(count) + " pending test result(s) did not come in time (" + FString::SanitizeFloat(NetworkingFinishTimeLimit) + "ms)! Original result: " + (InitialTestResult == EFunctionalTestResult::Succeeded ? "Success" : "Fail") + " - " + InitialMessage);
 		}
@@ -170,9 +168,6 @@ void AOrbMultiplayerFunctionalTest::ReceiveTestFinishReport(const TArray<FOrbMul
 		}
 
 		PendingTestResults.RemoveAt(index);
-		
-		if(hasError)
-			CancelPendingTests();
 	}
 }
 
@@ -200,6 +195,7 @@ bool AOrbMultiplayerFunctionalTest::RunTest(const TArray<FString>& Params)
 	InitialTestResult = EFunctionalTestResult::Default;
 	InitialEndTime = 0.f;
 	PendingTestResults.Empty(PendingTestResults.Num());
+	IsSkipping = false;
 	
 	if(ConfiguredPreparationTimeLimit == 0.f)
 		ConfiguredPreparationTimeLimit = PreparationTimeLimit;
@@ -207,6 +203,7 @@ bool AOrbMultiplayerFunctionalTest::RunTest(const TArray<FString>& Params)
 
 	if(!CommunicateRunTest(Params))
 	{
+		IsSkipping = true;
 		return true;
 	}
 	
