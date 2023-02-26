@@ -77,7 +77,7 @@ void AOrbMultiplayerFunctionalTest::CueRunTestInstructionToClient(const TArray<F
 		{
 			if(Iterator->IsValid())
 			{
-				if(APlayerController* PlayerController = Iterator->Get(); PlayerController->IsLocalController())
+				if(APlayerController* PlayerController = Iterator->Get())
 				{
 					if(AOrbMultiplayerAutomationController* MultiplayerAutomationController = Cast<AOrbMultiplayerAutomationController>(PlayerController))
 					{
