@@ -38,6 +38,7 @@ public class OrburierTesting : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"FunctionalTesting"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
