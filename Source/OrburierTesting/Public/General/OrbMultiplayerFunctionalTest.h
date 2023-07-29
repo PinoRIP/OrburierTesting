@@ -57,7 +57,7 @@ private:
 	EFunctionalTestResult InitialTestResult;
 	FString InitialMessage;
 	float InitialEndTime = 0.f;
-	
+	bool IsSkipping = false;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
